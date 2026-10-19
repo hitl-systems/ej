@@ -50,6 +50,21 @@ def write(path, payload, state, ck, tok_files, source=None):
     return {'path': path, 'bytes': os.path.getsize(path), 'sections': {n: s['length'] for n, s in header['sections'].items()}}
 
 
+def nonfinite_tensors(weights_dir):
+    """{file/tensor: count of NaN or inf entries} over the float tensors of state.safetensors and the encoder; {} when all are finite."""
+    import numpy as np
+    from safetensors import safe_open
+    from .. import loader
+    bad = {}
+    for part in loader.LAYOUT.values():
+        with safe_open(os.path.join(weights_dir, part + '.safetensors'), 'np') as f:
+            for k in f.keys():
+                a = f.get_tensor(k)
+                if a.dtype.kind == 'f' and not np.isfinite(a).all():
+                    bad[f'{part}/{k}'] = int((~np.isfinite(a)).sum())
+    return bad
+
+
 def from_weights_dir(weights_dir, out, verify=True):
     """Write the pack of an ej weights directory (state.* + encoder/w23.* + config.json) to out (a file path, or a directory
     that receives model.ejpack). Reads safetensors + JSON only; the tokenizer files come from the pinned base tokenizer."""
@@ -61,6 +76,9 @@ def from_weights_dir(weights_dir, out, verify=True):
     cfg = loader.read_config(weights_dir)
     if verify:
         loader.verify_weights(weights_dir, cfg)
+    bad = nonfinite_tensors(weights_dir)
+    if bad:  # a fit can leave NaN in the L-BFGS-fitted vectors; such a pack answers NaN for the inputs that touch them
+        raise ValueError(f'{weights_dir} holds non-finite tensors {bad}; refusing to pack (refit or repair them first)')
     loader.prepare_environment(weights_dir)
     with scope.isolated_import():
         import student_state as ST

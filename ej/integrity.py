@@ -24,11 +24,13 @@ KNOWN_RELEASES = {
 # state key is listed here must match it; a pack not listed loads with a warning (sections checked against its own header).
 KNOWN_PACKS = {
     '3b3e66d28fb423f9': '68459de15b060169ce05ca4ed76304a40a112ba1e2e45d3e7ee2c48c35a15c8a',  # ej 0.0.1
+    '5e3d62b832c3e2d0': '480238fbe5b65dbb843b876e060adacb038a0a025cf3fce3e56f98b02a709324',  # ej 0.0.2
 }
 # sha256 of the published model.ejpack file of each known state (checked by ej.hub before a downloaded pack is used; the content
 # digest above is checked for every pack). ej 0.0.1: https://huggingface.co/5ak3t/ej, revision v0.0.1.
 KNOWN_PACK_FILES = {
     '3b3e66d28fb423f9': 'e990e1846cba43f8405a969c606057f2fd6e2076595f4a34d202e8fc531891b0',  # ej 0.0.1
+    '5e3d62b832c3e2d0': 'c73bc8e8b691cf8c872973435aabc54bf04dcf99c1870aefe77682bce37668d9',  # ej 0.0.2 (HF revision v0.0.2)
 }
 # Where each known state comes from: the training pool (sha256), the low-bit encoder, and the model-code commit of the
 # maintainers' development repository (not public) whose student*/train_* files and pool reproduce the state key
@@ -39,6 +41,14 @@ RELEASE_PROVENANCE = {
         'pool_sha256': 'ce1c1a6fecfd62a90317f6efc4f90fd5f9261becb7081fd00235a6f4d5ee9dbe',
         'model_code_commit': 'f46cf7c', 'encoder': 'lowbit-b3b010513f948ceb',
         'key_tree': 'f46cf7c model code with student_lb.CK_DIR = lowbit-b3b010513f948ceb (scripts/state_key.py --ck-dir)',
+    },
+    '5e3d62b832c3e2d0': {
+        'version': '0.0.2',
+        'pool_sha256': '510e356463f36870ef6ca8d48ec33a7378462e2945111fefb73edc4138a50c1e',
+        'model_code_commit': '2078617^', 'encoder': 'lowbit-1a918c3be29821d3',
+        'key_tree': 'this repository at 2078617^ (window 256) with ej/train/hdn.py as of this release; fitted with `python -m ej.train fit`, '
+                    'seed 1, torch 2.5.1; the relational-reader vector (2,816 entries had come out non-finite) was refitted on the same inputs '
+                    'with the same L2 and swapped in; pool = ej 0.0.1 pool + Bekko slice, see docs/data-card-0.0.2.md',
     },
 }
 

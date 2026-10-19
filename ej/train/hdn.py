@@ -45,6 +45,11 @@ def pair_heads(items, hold):
     for g, h in itertools.combinations(sorted(set(pg) | set(hg)), 2):
         keep = ~np.isin(pg, [g, h]) & ~np.isin(hg, [g, h])
         k = np.flatnonzero(keep)
+        if not len(k) or not val[k].any():  # nothing to train or select on without both groups: the zero head, as for structured groups
+            out['z'][frozenset({g, h})] = torch.zeros((len(X),) + tuple(Z.shape[1:])).half()
+            out['groups'][frozenset({g, h})] = []
+            print('hdn head', g, h, 'zero head (no rows left)', file=sys.stderr, flush=True)
+            continue
         net, v = DN.train(X[k], Z[k], val[k])
         out['z'][frozenset({g, h})] = DN.predict(net, X).half()
         out['groups'][frozenset({g, h})] = sorted(set(pg[k]) | set(hg[k]))

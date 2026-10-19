@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+- New weights (not yet tagged): `ej` 0.0.2 pack, state `5e3d62b832c3e2d0`, sha256 `c73bc8e8...` (`ej/integrity.py` lists it). Trained on the ej 0.0.1 pool plus
+  80 questions from each of 121 licence-checked subsets of the Bekko System One dataset (17,629 records, 18 groups;
+  `docs/data-card-0.0.2.md`). On the development suites it is better than 0.0.1 on zero-shot transfer (zs_td, zs_massive) and
+  on the Bekko validation split, and slightly worse on td and tickets; the mean development NLL goes 0.736 -> 0.679.
+- Fix (training): `ej.train.hdn.pair_heads` crashed (`torch.cat(): expected a non-empty list`) when removing a pair of plain-text
+  groups left no rows; such a pair now gets the zero head, as structured groups do.
+- Fix (packing): `ej.train export` refuses a weights directory holding NaN or inf (a fit had left 2,816 in the relational
+  reader's vector); before, the pack answered NaN for inputs that touched them.
 - `python -m ej.serve`: ej over HTTP in the System One wire format (`POST /v1/systemone`, `GET /health`), for clients and
   benchmark harnesses of Jev-compatible servers (`ej/serve.py`, `ej/serve_wire.py`). Texts longer than the encoder's
   256-token window are refused with HTTP 422 by default (`--overflow reject`); `--overflow truncate` answers with ej's
